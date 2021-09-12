@@ -1,12 +1,6 @@
-
-from enum import Enum
-from sqlalchemy.schema import Sequence
-from sqlalchemy import Table, Column, Integer, String, DateTime, ForeignKey, Interval
+from sqlalchemy import Column, Float, String, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 from datetime import datetime
-from sqlalchemy.orm import relation, relationship
-from sqlalchemy.sql.elements import Case
-from sqlalchemy.sql.expression import column
-from sqlalchemy.sql.sqltypes import DATE, Float
 from utils import gen_primarykey
 from .base import Base
 
@@ -19,7 +13,7 @@ class User(Base):
 
 class Post(Base):
   id = Column(String, default=gen_primarykey, primary_key=True, index=True)
-  point = Column(Integer, unique=True, index=True)
+  point = Column(Float, unique=True, index=True)
   user_id = Column(String, ForeignKey('user.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=False)
   created_at = Column(DateTime, default=datetime.now)
   updated_at = Column(DateTime, default=datetime.now)
@@ -28,21 +22,6 @@ class Post(Base):
     'User',
   )
 
-  images = relationship(
-    'Image',
-  )
-
-  seen_users = relationship(
-    'User',
-    secondary='seen',
-  )
-
-  favorited_users = relationship(
-    'User',
-    secondary='favorite',
-  )
-
-
 class Image(Base):
   id = Column(String, default=gen_primarykey, primary_key=True, index=True)
   url = Column(String, unique=True, index=True)
@@ -50,3 +29,6 @@ class Image(Base):
   created_at = Column(DateTime, default=datetime.now)
   updated_at = Column(DateTime, default=datetime.now)
   
+  post = relationship(
+    'Post',
+  )
