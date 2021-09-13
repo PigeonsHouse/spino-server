@@ -2,11 +2,10 @@ from datetime import datetime
 from schemas.images import Image
 from .users import User
 from pydantic import BaseModel
-from fastapi import UploadFile
 from typing import List
 
 class BasePost(BaseModel):
-    images_url: List[UploadFile]
+    images_url: List[str]
 
 class Post(BaseModel):
     id: str
