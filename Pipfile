@@ -12,6 +12,7 @@ psycopg2 = "*"
 python-multipart = "*"
 requests = "*"
 flake8 = "*"
+firebase_admin = "*"
 
 [dev-packages]
 
