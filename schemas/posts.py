@@ -4,9 +4,6 @@ from .users import User
 from pydantic import BaseModel
 from typing import List
 
-class BasePost(BaseModel):
-    images_url: List[str]
-
 class Post(BaseModel):
     id: str
     user: User
