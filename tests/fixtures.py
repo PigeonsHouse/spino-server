@@ -12,7 +12,9 @@ from sqlalchemy.orm.session import Session
 
 from main import app
 import os
-from db import Base, get_db
+from db import Base, get_db, models
+from schemas.users import User
+
 
 DATABASE = 'postgresql'
 USER = os.environ.get('POSTGRES_USER')
@@ -66,6 +68,16 @@ def use_test_db_fixture():
   yield SessionLocal()
 
 @pytest.fixture
+def session_for_test():
+  """
+  DB Session for test
+  """
+  session = SessionLocal()
+  yield session
+  
+  session.close()
+
+@pytest.fixture
 def user_token_test():
     api_key = CONFIG["apiKey"]
     uri = f"https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key={api_key}"
@@ -75,7 +87,18 @@ def user_token_test():
 
     user = result.json()
 
-    pprint(user)
-    pprint(user['idToken'])
-    
     return user['idToken']
+
+@pytest.fixture
+def post_user_for_test(session_for_test, user_token_test):
+  user_orm = models.User(
+    id = user_token_test,
+    name = "username"
+  )
+
+  session_for_test.add(user_orm)
+  session_for_test.commit()
+  session_for_test.refresh(user_orm)
+  user = User.from_orm(user_orm)
+
+  return user
