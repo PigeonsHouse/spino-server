@@ -6,13 +6,13 @@ from .base import Base
 
 class User(Base):
   id = Column(String, default=gen_primarykey, primary_key=True, index=True)
-  name = Column(String, unique=True, index=True)
+  name = Column(String, unique=False, index=True)
   created_at = Column(DateTime, default=datetime.now)
   updated_at = Column(DateTime, default=datetime.now)
 
 class Post(Base):
   id = Column(String, default=gen_primarykey, primary_key=True, index=True)
-  point = Column(Float, unique=True, index=True)
+  point = Column(Float, unique=False, index=True)
   user_id = Column(String, ForeignKey('user.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=False)
   created_at = Column(DateTime, default=datetime.now)
   updated_at = Column(DateTime, default=datetime.now)

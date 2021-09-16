@@ -8,7 +8,7 @@ import sqlalchemy_utils
 from fastapi.testclient import TestClient
 from pytest import fixture
 from sqlalchemy.orm.session import Session
-
+import firebase_admin
 
 from main import app
 import os
@@ -92,7 +92,7 @@ def user_token_test():
 @pytest.fixture
 def post_user_for_test(session_for_test, user_token_test):
   user_orm = models.User(
-    id = user_token_test,
+    id = firebase_admin.auth.verify_id_token(user_token_test)['user_id'],
     name = "username"
   )
 

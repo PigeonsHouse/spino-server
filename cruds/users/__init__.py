@@ -21,18 +21,17 @@ def get_current_user_id(cred: HTTPAuthorizationCredentials = Depends(HTTPBearer(
         )
 
     user = decoded_token['user_id']
-    print(user)
 
     return user
 
-def create_user(db: Session, name: str, current_user: str) -> User:
+def create_user(db: Session, name: str, current_user_id: str) -> User:
     
-    user = _get_user(db, name)
+    user = _get_user(db, current_user_id)
     if user != None:
         raise HTTPException(400, 'Specified username has already taken')
 
     user_orm = models.User(
-        id = current_user,
+        id = current_user_id,
         name = name
     )
 
@@ -42,8 +41,8 @@ def create_user(db: Session, name: str, current_user: str) -> User:
     user = User.from_orm(user_orm)
     return user
 
-def _get_user(db: Session, name: str) -> User:
-	user_orm = db.query(models.User).filter(models.User.name == name).first()
-	if user_orm == None:
-		return None
-	return User.from_orm(user_orm)
+def _get_user(db: Session, id: str) -> User:
+    user_orm = db.query(models.User).filter(models.User.id == id).first()
+    if user_orm == None:
+        return None
+    return User.from_orm(user_orm)
