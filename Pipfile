@@ -13,6 +13,7 @@ python-multipart = "*"
 requests = "*"
 flake8 = "*"
 firebase_admin = "*"
+pydantic = {extras = ["email"], version = "*"}
 
 [dev-packages]
 

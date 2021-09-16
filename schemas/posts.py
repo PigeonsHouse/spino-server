@@ -1,7 +1,8 @@
 from datetime import datetime
 from schemas.images import Image
 from .users import User
-from pydantic import BaseModel, UploadFile
+from pydantic import BaseModel
+from fastapi import UploadFile
 from typing import List
 
 class BasePost(BaseModel):
