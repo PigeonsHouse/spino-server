@@ -6,8 +6,7 @@ from .base import Base
 
 class User(Base):
   id = Column(String, default=gen_primarykey, primary_key=True, index=True)
-  username = Column(String, unique=True, index=True)
-  email = Column(String, unique=True, index=True, nullable=False)
+  name = Column(String, unique=True, index=True)
   created_at = Column(DateTime, default=datetime.now)
   updated_at = Column(DateTime, default=datetime.now)
 

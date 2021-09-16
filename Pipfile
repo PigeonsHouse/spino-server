@@ -12,7 +12,11 @@ psycopg2 = "*"
 python-multipart = "*"
 requests = "*"
 flake8 = "*"
+firebase_admin = "*"
 pydantic = {extras = ["email"], version = "*"}
+pytest = "*"
+sqlalchemy-utils = "*"
+python-dotenv = "*"
 
 [dev-packages]
 
