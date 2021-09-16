@@ -14,9 +14,9 @@ requests = "*"
 flake8 = "*"
 firebase_admin = "*"
 pydantic = {extras = ["email"], version = "*"}
-firebase_admin = "*"
 pytest = "*"
 sqlalchemy-utils = "*"
+python-dotenv = "*"
 
 [dev-packages]
 
