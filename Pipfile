@@ -17,6 +17,9 @@ pydantic = {extras = ["email"], version = "*"}
 pytest = "*"
 sqlalchemy-utils = "*"
 python-dotenv = "*"
+google-cloud-vision = "*"
+numpy = "*"
+scipy = "*"
 
 [dev-packages]
 

@@ -1,3 +1,4 @@
+from db import models
 from schemas.ComputerVision import ComputerVisionResponse
 from typing import List
 from sqlalchemy.orm.session import Session
@@ -5,26 +6,64 @@ from schemas.posts import Post
 import os
 import requests, json
 from fastapi import HTTPException
+from google.cloud import vision
+from gensim.models import word2vec
+
+client = vision.ImageAnnotatorClient()
+image = vision.Image()
+model = word2vec.Word2Vec.load('word2vec.model')
 
 subscription_key = os.environ.get('SUBSCRIPTION_KEY')
 endpoint = os.environ.get('AZURE_ENDPOINT')
 
-def image_scoring(images_url: List[str]) -> List[ComputerVisionResponse]:
-    return list(map(image_post_azure, images_url))
+def image_scoring(images_url: List[str]) -> List[List[str]]:
+    return list(map(image_post_google, images_url))
 
-def image_post_azure(image_url: str) -> ComputerVisionResponse:
-    analyze_url = endpoint + "vision/v3.1/analyze"
+def image_post_google(image_url: str) -> List[str]:
+    image.source.image_uri = image_url
+    response = client.label_detection(image=image)
+    labels = response.label_annotations
+    return_list = []
+    for label in labels:
+        new_list = label.description.split(' ')
+        return_list.extend(new_list)
+    return return_list
 
-    headers = {'Ocp-Apim-Subscription-Key': subscription_key}
-    params = {'visualFeatures': 'Description', 'language': 'en'}
-    data = {'url': image_url}
+def scoring_word(responses: List[List[str]]):
+    for image_words in responses:
+        point = 0
+        for b in image_words:
+            try:
+                results = model.wv.most_similar(positive=b, topn=20)
+            except:
+                point -= 1000
+                continue
 
-    try:
-        response = requests.post(analyze_url, headers=headers, params=params, json=data)
-        response.raise_for_status()
-        print(response.json())
+            for a in results:
+                if a[0] in image_words:
+                    point += a[1] * 1000
+                else:
+                    point -= a[1] * 100
 
-        return response.json()
-    except:
-        raise HTTPException(status_code=400, detail="cannot get responce")
+        print(point / len(results))
 
+
+def set_score_for_db(db: Session, user_id: str, score: float):
+    post_orm = models.Post(
+        user_id = user_id,
+        point = score
+    )
+    db.add(post_orm)
+    db.commit()
+    db.refresh(post_orm)
+    return Post.from_orm(post_orm)
+
+def set_images_for_db(db: Session, post_id: str, images_url: List[str]):
+    for image_url in images_url:
+        image_orm = models.Image(
+            post_id = post_id,
+            url = image_url
+        )
+        db.add(image_orm)
+        db.commit()
+        db.refresh(image_orm)
