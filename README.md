@@ -1,6 +1,11 @@
 # 夏の赤ペン先生
 
 ## 開発技術
+コマンド
+
+```
+ docker exec -it spino-server_server_1 /bin/sh
+```
 
 ### フロントエンド
 
