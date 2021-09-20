@@ -1,3 +1,4 @@
 .env
 cert.json
 environ.json
+create_azure_container.bat
