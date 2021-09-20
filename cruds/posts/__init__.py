@@ -77,3 +77,13 @@ def set_images_for_db(db: Session, post_id: str, images_url: List[str]):
         db.add(image_orm)
         db.commit()
         db.refresh(image_orm)
+
+def get_posts_me(db: Session, id: str) -> Post:
+    post_orms = db.query(models.Post).filter(models.Post.user_id == id).all()
+    print(post_orms)
+    posts = []
+    if len(post_orms) == 0:
+        return None
+    for post_orm in post_orms:
+        posts.append(Post.from_orm(post_orm))
+    return posts
