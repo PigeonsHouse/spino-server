@@ -10,30 +10,36 @@ class TestCreateUser:
         ユーザーを登録する
         """
         name: str = "test_username"
+        img: str = "test_img"
         token: str = user_token_test
         id: str = firebase_admin.auth.verify_id_token(token)['user_id']
 
         res = client.post('/api/v1/signup', headers={
             "Authorization": f"Bearer { token }"
         }, json={
-            "name": name
+            "name": name,
+            "img": img
         })
 
         assert res.status_code == 200
         res_json = res.json()
         assert res_json['id'] == id
         assert res_json['name'] == name
+        assert res_json['img'] == img
+
 
     def test_post_already_user(use_test_db_fixture, user_token_test, post_user_for_test):
         """
         すでに登録されているユーザーを登録する
         """
         name: str = post_user_for_test.name
+        img: str = post_user_for_test.img
         token: str = user_token_test
         res = client.post('/api/v1/signup', headers={
             "Authorization": f"Bearer { token }"
         }, json={
-            "name": name
+            "name": name,
+            "img": img
         })
 
         assert res.status_code == 400 
@@ -43,6 +49,7 @@ class TestCreateUser:
         ユーザー情報の取得
         """
         name: str = post_user_for_test.name
+        img: str = post_user_for_test.img
         token: str = user_token_test
         id: str = post_user_for_test.id
 
@@ -54,4 +61,6 @@ class TestCreateUser:
         res_json = res.json()
         assert res_json['id'] == id
         assert res_json['name'] == name
+        assert res_json['img'] == img
+
 
