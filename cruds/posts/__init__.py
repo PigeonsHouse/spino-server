@@ -24,6 +24,8 @@ def image_post_google(image_url: str) -> List[str]:
     response = client.label_detection(image=image)
     labels = response.label_annotations
     return_list = []
+    if len(labels) == 0:
+        raise HTTPException(400, 'We can not access the URL currently. Please download the content and pass it in.')
     for label in labels:
         new_list = label.description.split(' ')
         return_list.extend(new_list)
