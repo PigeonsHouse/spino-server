@@ -27,15 +27,21 @@ def image_post_google(image_url: str) -> List[str]:
     for label in labels:
         new_list = label.description.split(' ')
         return_list.extend(new_list)
+    print(return_list)
     return return_list
 
-def scoring_word(responses: List[List[str]]):
+def scoring_word(responses: List[List[str]]) -> float:
+    finally_score = 0
     for image_words in responses:
         point = 0
+        results = []
         for b in image_words:
             try:
-                results = model.wv.most_similar(positive=b, topn=20)
+                results = model.wv.most_similar(positive=[b], topn=20)
+                print('=====results====')
+                print(results)
             except:
+                print('=====減点====')
                 point -= 1000
                 continue
 
@@ -44,9 +50,11 @@ def scoring_word(responses: List[List[str]]):
                     point += a[1] * 1000
                 else:
                     point -= a[1] * 100
-
-        print(point / len(results))
-
+        if len(results):
+            finally_score += point / len(results)
+        else:
+            finally_score += point
+    return finally_score / len(responses)
 
 def set_score_for_db(db: Session, user_id: str, score: float):
     post_orm = models.Post(
