@@ -1,8 +1,11 @@
 from datetime import datetime
-from schemas.images import Image
+from pydantic.networks import HttpUrl
 from .users import User
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import Optional
+
+class CreatingPost(BaseModel):
+    image_url: str 
 
 class Post(BaseModel):
     id: str
@@ -10,7 +13,7 @@ class Post(BaseModel):
     point: float
     rank_post: Optional[int]
     rank_user: Optional[int]
-    images: Optional[List[Image]]
+    image_url: HttpUrl
     created_at: datetime
     updated_at: datetime
 
