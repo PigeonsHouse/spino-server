@@ -2,18 +2,15 @@ from datetime import datetime
 from schemas.images import Image
 from .users import User
 from pydantic import BaseModel
-from typing import List
-
-class BasePost(BaseModel):
-    images_url: List[str]
+from typing import List, Optional
 
 class Post(BaseModel):
     id: str
     user: User
     point: float
-    rank_post: int
-    rank_user: int
-    images: List[Image]
+    rank_post: Optional[int]
+    rank_user: Optional[int]
+    images: Optional[List[Image]]
     created_at: datetime
     updated_at: datetime
 

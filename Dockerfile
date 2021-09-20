@@ -1,14 +1,17 @@
-FROM python:3.9.5-alpine
+FROM python:3.9.5-slim
 
-RUN apk add gcc linux-headers make libffi-dev musl-dev g++
+RUN apt-get update
 
-RUN apk add --no-cache postgresql-libs && \
-	apk add --no-cache --virtual .build-deps gcc musl-dev postgresql-dev
+RUN apt-get install -y gcc make libffi-dev musl-dev g++ libpq-dev
+
+RUN apt-get install -y gcc musl-dev 
 
 RUN mkdir /app
 WORKDIR /app
 
 COPY . /app/
 
-RUN pip install pipenv
-RUN pipenv install
+RUN pip install fastapi sqlalchemy uvicorn pyjwt \
+	psycopg2 python-multipart requests flake8 firebase_admin \
+	pydantic pytest sqlalchemy_utils python-dotenv \
+	google-cloud-vision gensim

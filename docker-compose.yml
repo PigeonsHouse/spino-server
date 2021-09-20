@@ -16,7 +16,7 @@ services:
       - .:/app
     ports:
       - '8000:8000'
-    command: 'sh -c "pipenv run uvicorn main:app --host 0.0.0.0 --reload"'
+    command: 'sh -c "uvicorn main:app --host 0.0.0.0 --reload"'
 
 volumes:
   dbdata:

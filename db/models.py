@@ -32,7 +32,7 @@ class Post(Base):
 
 class Image(Base):
   id = Column(String, default=gen_primarykey, primary_key=True, index=True)
-  url = Column(String, unique=True, index=True)
+  url = Column(String, index=True)
   post_id = Column(String, ForeignKey('post.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=False)
   created_at = Column(DateTime, default=datetime.now)
   updated_at = Column(DateTime, default=datetime.now)
