@@ -1,3 +1,4 @@
+from requests.api import post
 from sqlalchemy import Column, Float, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -6,9 +7,13 @@ from .base import Base
 
 class User(Base):
   id = Column(String, default=gen_primarykey, primary_key=True, index=True)
-  name = Column(String, unique=True, index=True)
+  name = Column(String, unique=False, index=True)
   created_at = Column(DateTime, default=datetime.now)
   updated_at = Column(DateTime, default=datetime.now)
+
+  post = relationship(
+    'Post', back_populates="user"
+  )
 
 class Post(Base):
   id = Column(String, default=gen_primarykey, primary_key=True, index=True)
@@ -18,10 +23,11 @@ class Post(Base):
   updated_at = Column(DateTime, default=datetime.now)
 
   user = relationship(
-    'User',
+    'User', back_populates="post"
   )
-  images = relationship(
-    'Image', back_populates='post'
+
+  image = relationship(
+    'Image', back_populates="post"
   )
 
 class Image(Base):
@@ -32,5 +38,5 @@ class Image(Base):
   updated_at = Column(DateTime, default=datetime.now)
   
   post = relationship(
-    'Post', back_populates='images'
+    'Post', back_populates="image"
   )

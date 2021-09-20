@@ -1,6 +1,17 @@
 # 夏の赤ペン先生
 
 ## 開発技術
+コマンド
+
+docker container に入る
+```
+ docker exec -it spino-server_server_1 /bin/sh
+```
+
+volumeの削除
+```
+docker volume rm spino-server_dbdata
+```
 
 ### フロントエンド
 
