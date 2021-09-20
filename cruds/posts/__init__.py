@@ -29,27 +29,42 @@ def image_post_google(image_url: str) -> List[str]:
     return return_list
 
 def scoring_word(image_words: List[str]) -> float:
-    point = 0
+    each_score = []
+    
     results = []
-    for image_word in image_words:
+    for b in image_words:
+        match_word_num = 0
+        score_of_one_word = 0
         try:
-            results = model.wv.most_similar(positive=[image_word], topn=20)
+            results = model.wv.most_similar(positive=[b], topn=20)
             print('=====results====')
             print(results)
         except:
-            print('=====減点====')
-            point -= 1000
+            print(results)
+            print('============')
             continue
 
         for a in results:
             if a[0] in image_words:
-                point += a[1] * 1000
-            else:
-                point -= a[1] * 100
-    if len(results):
-        return point / len(results)
-    else:
-        return point
+                match_word_num += 1
+                score_of_one_word += a[1] * 100
+                print("a")
+        score_element = {'match_word_num': match_word_num, 'score_of_one_word': score_of_one_word}
+        each_score.append(score_element)
+        print(each_score)
+    print("new_scorering")
+                    
+    return _max_match_raito(each_score)
+
+def _max_match_raito(each_score: List[dict]):
+    max_point = 10
+    max_raito = -1
+    for index in each_score:
+        if index['match_word_num'] > max_raito:
+            max_point = index['score_of_one_word']
+            max_raito = index['match_word_num']
+    
+    return max_point
 
 def set_score_for_db(db: Session, user_id: str, score: float, image_url: str):
     post_orm = models.Post(
