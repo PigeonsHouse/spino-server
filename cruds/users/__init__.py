@@ -4,7 +4,7 @@ import firebase_admin
 from firebase_admin import auth, credentials
 from sqlalchemy.orm import Session
 from db import models, get_db
-from schemas.users import User
+from schemas.users import BaseUser, User, PutUser
 import sys
 
 cert = credentials.Certificate('cert.json')
@@ -24,15 +24,16 @@ def get_current_user_id(cred: HTTPAuthorizationCredentials = Depends(HTTPBearer(
 
     return user
 
-def create_user(db: Session, name: str, current_user_id: str) -> User:
+def create_user(db: Session, name: str, img: str, id: str) -> User:
     
-    user = _get_user(db, current_user_id)
+    user = _get_user(db, id)
     if user != None:
         raise HTTPException(400, 'Specified username has already taken')
 
     user_orm = models.User(
-        id = current_user_id,
-        name = name
+        id = id,
+        name = name,
+        img = img
     )
 
     db.add(user_orm)
@@ -46,3 +47,18 @@ def _get_user(db: Session, id: str) -> User:
     if user_orm == None:
         return None
     return User.from_orm(user_orm)
+
+def change_info(db: Session, payload: PutUser, id: str) -> User:
+    user_orm = db.query(models.User).filter(models.User.id == id).first()
+    if (payload.name != None):
+        user_orm.name = payload.name
+    elif (payload.img != None):
+        user_orm.img = payload.img
+    else:
+        user_orm.name = payload.name
+        user_orm.img =payload.name
+
+    db.commit()
+    db.refresh(user_orm)
+    user = User.from_orm(user_orm)
+    return user

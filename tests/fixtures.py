@@ -93,7 +93,8 @@ def user_token_test():
 def post_user_for_test(session_for_test, user_token_test):
   user_orm = models.User(
     id = firebase_admin.auth.verify_id_token(user_token_test)['user_id'],
-    name = "username"
+    name = "username",
+    img = "imgURL"
   )
 
   session_for_test.add(user_orm)

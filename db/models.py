@@ -8,6 +8,7 @@ from .base import Base
 class User(Base):
   id = Column(String, default=gen_primarykey, primary_key=True, index=True)
   name = Column(String, unique=False, index=True)
+  img = Column(String, unique=False, index=True)
   created_at = Column(DateTime, default=datetime.now)
   updated_at = Column(DateTime, default=datetime.now)
 
