@@ -8,7 +8,7 @@ from fastapi import HTTPException
 from google.cloud import vision
 from gensim.models import word2vec
 from firebase_admin import storage
-from datetime import datetime
+from datetime import timedelta
 
 client = vision.ImageAnnotatorClient()
 image = vision.Image()
@@ -102,7 +102,7 @@ def convert_http_url_from_gs(gs_url: str) -> str:
 
     backet = storage.bucket(bucket_name)
 
-    url = backet.blob(blob_path).generate_signed_url(expiration=datetime.now())
+    url = backet.blob(blob_path).generate_signed_url(expiration=timedelta(minutes=30))
 
     return url
 
