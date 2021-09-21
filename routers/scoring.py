@@ -28,5 +28,5 @@ def post_scoring(payload: CreatingPost, product: bool = True, db: Session = Depe
     image_responce = image_post_google(image_url)
     result_score = scoring_word(image_responce)
     post = set_score_for_db(db, user_id, result_score, image_url)
-    post.rank_post = get_post_rank(db, post.id)
+    post.rank = get_post_rank(db, post.id)
     return post

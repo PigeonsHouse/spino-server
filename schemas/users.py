@@ -18,3 +18,7 @@ class User(BaseUser):
 
     class Config:
         orm_mode = True
+
+class RankingUser(User):
+    rank: Optional[int]
+    high_score: Optional[int]
