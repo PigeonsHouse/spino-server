@@ -90,14 +90,19 @@ def set_score_for_db(db: Session, user_id: str, score: int, image_url: str) -> P
     db.add(post_orm)
     db.commit()
     db.refresh(post_orm)
-    set_high_score_post(db, user_id, score, image_url)
-    return Post.from_orm(post_orm)
+    post = Post.from_orm(post_orm)
+    set_high_score_post(db, post.id, user_id, score, image_url)
+    return post
 
-def set_high_score_post(db: Session, user_id: str, score: int, image_url: str) -> Post:
+def set_high_score_post(db: Session, post_id: str, user_id: str, score: int, image_url: str) -> Post:
     my_top_post = db.query(models.TopPost).filter(models.TopPost.user_id == user_id).first()
     
+    print("post_id")
+    print(post_id)
+
     if my_top_post is None:
         post_orm = models.TopPost(
+            id = post_id,
             user_id = user_id,
             point = score,
             image_url = image_url
@@ -108,6 +113,7 @@ def set_high_score_post(db: Session, user_id: str, score: int, image_url: str) -
         return Post.from_orm(post_orm)
     elif my_top_post.point < score:
         post_orm = models.TopPost(
+            id = post_id,
             user_id = user_id,
             point = score,
             image_url = image_url
@@ -119,7 +125,7 @@ def set_high_score_post(db: Session, user_id: str, score: int, image_url: str) -
         return Post.from_orm(post_orm)
 
 def get_posts_me_by_limit(db: Session, user_id: str, limit: int) -> List[Post]:
-    post_orms = db.query(models.Post).filter(models.Post.user_id == user_id).limit(limit).all()
+    post_orms = db.query(models.Post).filter(models.Post.user_id == user_id).order_by(desc(models.Post.created_at)).limit(limit).all()
     posts = []
     if len(post_orms) == 0:
         return post_orms
@@ -146,14 +152,20 @@ def convert_http_url_from_gs(gs_url: str) -> str:
 
     return url
 
-def delete_post_by_id(db: Session, post_id: str) -> bool:
+def delete_post_by_id(db: Session, post_id: str, user_id) -> bool:
     delete_post = db.query(models.Post).filter(models.Post.id == post_id).first()
     if delete_post == None:
         raise HTTPException(400, 'Post not exist.')
-    user_id = delete_post.user_id
-    delete_top_post = db.query(models.TopPost).filter(models.TopPost.user_id == user_id).first()
+    if delete_post.user_id != user_id:
+        raise HTTPException(
+            status_code=400,
+            detail="can not delete post you do not make"
+        )
     db.delete(delete_post)
-    db.delete(delete_top_post)
+    delete_top_post = db.query(models.TopPost).filter(models.TopPost.id == post_id).first()
+    if delete_top_post is not None:
+        print(delete_top_post)
+        db.delete(delete_top_post)
     db.commit()
     return True
 
