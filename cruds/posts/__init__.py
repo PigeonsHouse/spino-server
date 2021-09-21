@@ -37,7 +37,7 @@ def image_post_google(image_url: str) -> List[str]:
         return_list.extend(new_list)
     return return_list
 
-def scoring_word(image_words: List[str]) -> float:
+def scoring_word(image_words: List[str]) -> int:
     add_score = 0
     fil = word_filter(image_words)
     if fil == True:
@@ -62,7 +62,7 @@ def scoring_word(image_words: List[str]) -> float:
     
     result_score = _max_match_raito(each_score)
     b = result_score + add_score
-    return b * b / 20
+    return int(b * b / 20)
 
 def word_filter(image_words: List[str]) -> bool:
     if mainus_word_list[0] in image_words:
@@ -71,7 +71,7 @@ def word_filter(image_words: List[str]) -> bool:
 
     return False
 
-def _max_match_raito(each_score: List[dict]) -> float:
+def _max_match_raito(each_score: List[dict]) -> int:
     max_point = 10
     max_raito = -1
     for index in each_score:
@@ -79,9 +79,9 @@ def _max_match_raito(each_score: List[dict]) -> float:
             max_point = index['score_of_one_word']
             max_raito = index['match_word_num']
 
-    return max_point
+    return int(max_point)
 
-def set_score_for_db(db: Session, user_id: str, score: float, image_url: str) -> Post:
+def set_score_for_db(db: Session, user_id: str, score: int, image_url: str) -> Post:
     post_orm = models.Post(
         user_id = user_id,
         point = score,
@@ -93,7 +93,7 @@ def set_score_for_db(db: Session, user_id: str, score: float, image_url: str) ->
     set_high_score_post(db, user_id, score, image_url)
     return Post.from_orm(post_orm)
 
-def set_high_score_post(db: Session, user_id: str, score: float, image_url: str) -> Post:
+def set_high_score_post(db: Session, user_id: str, score: int, image_url: str) -> Post:
     my_top_post = db.query(models.TopPost).filter(models.TopPost.user_id == user_id).first()
     
     if my_top_post is None:

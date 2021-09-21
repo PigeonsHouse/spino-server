@@ -38,7 +38,7 @@ class TestPost:
                 "image_url": "https://example.com/hoge.jpg"
             },
             {
-                "point": 3.1415,
+                "point": 300,
                 "image_url": "https://example.com/fuga.png"
             }
         ]

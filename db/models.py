@@ -1,7 +1,8 @@
 from requests.api import post
-from sqlalchemy import Column, Float, String, DateTime, ForeignKey
+from sqlalchemy import Column, String, DateTime, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 from datetime import datetime
+
 from utils import gen_primarykey
 from .base import Base
 
@@ -22,7 +23,7 @@ class User(Base):
 
 class TopPost(Base):
   id = Column(String, default=gen_primarykey, primary_key=True, index=True)
-  point = Column(Float, unique=False, index=True)
+  point = Column(Integer, unique=False, index=True)
   user_id = Column(String, ForeignKey('user.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=False)
   image_url = Column(String, index=True)
   created_at = Column(DateTime, default=datetime.now)
@@ -34,7 +35,7 @@ class TopPost(Base):
 
 class Post(Base):
   id = Column(String, default=gen_primarykey, primary_key=True, index=True)
-  point = Column(Float, unique=False, index=True)
+  point = Column(Integer, unique=False, index=True)
   user_id = Column(String, ForeignKey('user.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=False)
   image_url = Column(String, index=True)
   created_at = Column(DateTime, default=datetime.now)

@@ -112,7 +112,7 @@ def post_user_for_test(session_for_test, user_token_factory_test):
 def post_factory_for_test(session_for_test, user_token_factory_test):
   def create_post_for_test(
     user_num: int = 0,
-    point: float = 10000,
+    point: int = 10000,
     image_url: str = 'https://example.com/'
   ):
     user_token_test = user_token_factory_test(user_num)

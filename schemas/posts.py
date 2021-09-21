@@ -10,7 +10,7 @@ class CreatingPost(BaseModel):
 class Post(BaseModel):
     id: str
     user: User
-    point: float
+    point: int 
     rank: Optional[int]
     image_url: str
     created_at: datetime
