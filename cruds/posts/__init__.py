@@ -90,9 +90,8 @@ def get_posts_me(db: Session, id: str) -> List[Post]:
 def get_posts_by_limit(db: Session, limit: int) -> List[Post]:
     posts_orm = db.query(models.Post).order_by(desc(models.Post.point)).limit(limit).all()
     posts = []
-    for i, post_orm in enumerate(posts_orm):
+    for post_orm in posts_orm:
         post = Post.from_orm(post_orm)
-        post.rank_post = i+1
         posts.append(post)
     return posts
 
