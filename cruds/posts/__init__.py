@@ -75,7 +75,33 @@ def set_score_for_db(db: Session, user_id: str, score: float, image_url: str) ->
     db.add(post_orm)
     db.commit()
     db.refresh(post_orm)
+    set_high_score_post(db, user_id, score, image_url)
     return Post.from_orm(post_orm)
+
+def set_high_score_post(db: Session, user_id: str, score: float, image_url: str) -> Post:
+    my_top_post = db.query(models.TopPost).filter(models.TopPost.user_id == user_id).first()
+    
+    if my_top_post is None:
+        post_orm = models.TopPost(
+            user_id = user_id,
+            point = score,
+            image_url = image_url
+        )
+        db.add(post_orm)
+        db.commit()
+        db.refresh(post_orm)
+        return Post.from_orm(post_orm)
+    elif my_top_post.point < score:
+        post_orm = models.TopPost(
+            user_id = user_id,
+            point = score,
+            image_url = image_url
+        )
+        db.add(post_orm)
+        db.delete(my_top_post)
+        db.commit()
+        db.refresh(post_orm)
+        return Post.from_orm(post_orm)
 
 def get_posts_me_by_limit(db: Session, user_id: str, limit: int) -> List[Post]:
     post_orms = db.query(models.Post).filter(models.Post.user_id == user_id).limit(limit).all()
@@ -109,8 +135,10 @@ def delete_post_by_id(db: Session, post_id: str) -> bool:
     delete_post = db.query(models.Post).filter(models.Post.id == post_id).first()
     if delete_post == None:
         raise HTTPException(400, 'Post not exist.')
-    print(delete_post)
-    a = db.delete(delete_post)
+    user_id = delete_post.user_id
+    delete_top_post = db.query(models.TopPost).filter(models.TopPost.user_id == user_id).first()
+    db.delete(delete_post)
+    db.delete(delete_top_post)
     db.commit()
     return True
 
