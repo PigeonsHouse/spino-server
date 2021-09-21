@@ -13,7 +13,7 @@ class Post(BaseModel):
     point: float
     rank_post: Optional[int]
     rank_user: Optional[int]
-    image_url: HttpUrl
+    image_url: str
     created_at: datetime
     updated_at: datetime
 

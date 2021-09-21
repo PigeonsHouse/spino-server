@@ -4,10 +4,11 @@ from typing import List
 from sqlalchemy.orm.session import Session
 from schemas.posts import Post
 import os
-import requests, json
 from fastapi import HTTPException
 from google.cloud import vision
 from gensim.models import word2vec
+from firebase_admin import storage
+from datetime import datetime
 
 client = vision.ImageAnnotatorClient()
 image = vision.Image()
@@ -67,7 +68,7 @@ def _max_match_raito(each_score: List[dict]):
     
     return max_point
 
-def set_score_for_db(db: Session, user_id: str, score: float, image_url: str):
+def set_score_for_db(db: Session, user_id: str, score: float, image_url: str) -> Post:
     post_orm = models.Post(
         user_id = user_id,
         point = score,
@@ -96,3 +97,14 @@ def get_posts_by_limit(db: Session, limit: int) -> List[Post]:
         post.rank_post = i+1
         posts.append(post)
     return posts
+
+def convert_http_url_from_gs(gs_url: str) -> str:
+    bucket_name = "summer-scoring-app.appspot.com"
+
+    blob_path = gs_url[gs_url.find(bucket_name)+len(bucket_name)+1:]
+
+    backet = storage.bucket(bucket_name)
+
+    url = backet.blob(blob_path).generate_signed_url(expiration=datetime.now())
+
+    return url
