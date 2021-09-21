@@ -77,12 +77,11 @@ def set_score_for_db(db: Session, user_id: str, score: float, image_url: str) ->
     db.refresh(post_orm)
     return Post.from_orm(post_orm)
 
-def get_posts_me(db: Session, id: str) -> List[Post]:
-    post_orms = db.query(models.Post).filter(models.Post.user_id == id).all()
-    print(post_orms)
+def get_posts_me_by_limit(db: Session, user_id: str, limit: int) -> List[Post]:
+    post_orms = db.query(models.Post).filter(models.Post.user_id == user_id).limit(limit).all()
     posts = []
     if len(post_orms) == 0:
-        return None
+        return post_orms
     for post_orm in post_orms:
         posts.append(Post.from_orm(post_orm))
     return posts
