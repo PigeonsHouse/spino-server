@@ -1,6 +1,4 @@
 import requests
-from pprint import pprint
-
 import sqlalchemy
 import pytest
 from sqlalchemy.orm import sessionmaker
@@ -9,11 +7,11 @@ from fastapi.testclient import TestClient
 from pytest import fixture
 from sqlalchemy.orm.session import Session
 import firebase_admin
-
 from main import app
 import os
 from db import Base, get_db, models
 from schemas.users import User
+from schemas.posts import Post
 
 
 DATABASE = 'postgresql'
@@ -27,21 +25,16 @@ ECHO_LOG = False
 engine = sqlalchemy.create_engine(DATABASE_URL, echo=ECHO_LOG)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+API_KEY = os.environ.get('API_KEY')
 
-
-CONFIG = {
-    "apiKey": os.environ.get('API_KEY'),
-    "authDomain": os.environ.get('AUTHDO_MAIN'),
-    "projectId": os.environ.get('PROJECT_ID'),
-    "storageBucket": os.environ.get('STORAGE_BUCKET'),
-    "messagingSenderId": os.environ.get('MESSAGING_SENDER_ID'),
-    "appId": os.environ.get('APP_ID'),
-    "measurementId": os.environ.get('MEASUREMENT_ID')
-}
-EMAIL = os.environ.get('EMAIL')
-PASSWORD = os.environ.get('PASSWORD')
+TEST_USER_EMAIL_1 = os.environ.get('TEST_USER_EMAIL_1')
+TEST_USER_PASSWORD_1 = os.environ.get('TEST_USER_PASSWORD_1')
+TEST_USER_EMAIL_2 = os.environ.get('TEST_USER_EMAIL_2')
+TEST_USER_PASSWORD_2 = os.environ.get('TEST_USER_PASSWORD_2')
 
 client = TestClient(app)
+
+print(TEST_USER_EMAIL_1)
 
 @pytest.fixture(scope="function")
 def use_test_db_fixture():
@@ -78,21 +71,32 @@ def session_for_test():
   session.close()
 
 @pytest.fixture
-def user_token_test():
-    api_key = CONFIG["apiKey"]
-    uri = f"https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key={api_key}"
-    data = {"email": EMAIL, "password": PASSWORD, "returnSecureToken": True}
+def user_token_factory_test():
+  """
+  test用Userのトークンを返す関数を返す
+  """
+  def user_token_for_test(user_num: int = 0):
+    uri = f"https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key={API_KEY}"
+    if user_num == 0:      
+      data = {"email": TEST_USER_EMAIL_1, "password": TEST_USER_PASSWORD_1, "returnSecureToken": True}
+    elif user_num == 1:
+      data = {"email": TEST_USER_EMAIL_2, "password": TEST_USER_PASSWORD_2, "returnSecureToken": True}
+    else:
+      data = None
 
     result = requests.post(url=uri, data=data)
 
     user = result.json()
 
     return user['idToken']
+  return user_token_for_test
 
 @pytest.fixture
-def post_user_for_test(session_for_test, user_token_test):
+def post_user_for_test(session_for_test, user_token_factory_test):
+  user_token_test = user_token_factory_test()
+  user_id = firebase_admin.auth.verify_id_token(user_token_test)['user_id']
   user_orm = models.User(
-    id = firebase_admin.auth.verify_id_token(user_token_test)['user_id'],
+    id = user_id,
     name = "username",
     img = "imgURL"
   )
@@ -103,3 +107,26 @@ def post_user_for_test(session_for_test, user_token_test):
   user = User.from_orm(user_orm)
 
   return user
+
+@pytest.fixture
+def post_factory_for_test(session_for_test, user_token_factory_test):
+  def create_post_for_test(
+    user_num: int = 0,
+    point: float = 10000,
+    image_url: str = 'https://example.com/'
+  ):
+    user_token_test = user_token_factory_test(user_num)
+    user_id = firebase_admin.auth.verify_id_token(user_token_test)['user_id']
+    post_orm = models.Post(
+      user_id = user_id,
+      point = point,
+      image_url = image_url
+    )
+
+    session_for_test.add(post_orm)
+    session_for_test.commit()
+    session_for_test.refresh(post_orm)
+    post = Post.from_orm(post_orm)
+
+    return post
+  return create_post_for_test
