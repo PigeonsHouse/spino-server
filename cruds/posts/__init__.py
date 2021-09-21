@@ -77,7 +77,7 @@ def set_score_for_db(db: Session, user_id: str, score: float, image_url: str) ->
     db.refresh(post_orm)
     return Post.from_orm(post_orm)
 
-def get_posts_me(db: Session, id: str) -> Post:
+def get_posts_me(db: Session, id: str) -> List[Post]:
     post_orms = db.query(models.Post).filter(models.Post.user_id == id).all()
     print(post_orms)
     posts = []
@@ -115,3 +115,10 @@ def delete_post_by_id(db: Session, post_id: str) -> bool:
     a = db.delete(delete_post)
     db.commit()
     return True
+
+def get_post_rank(db: Session, post_id: str) -> int:
+    post = db.query(models.Post).filter(models.Post.id == post_id).first()
+    if post == None:
+        raise HTTPException(400, 'Post not exist.')
+    upper_post_list = db.query(models.Post).filter(models.Post.point > post.point).all()
+    return 1+len(upper_post_list)
