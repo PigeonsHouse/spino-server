@@ -18,16 +18,21 @@ subscription_key = os.environ.get('SUBSCRIPTION_KEY')
 endpoint = os.environ.get('AZURE_ENDPOINT')
 
 def image_post_google(image_url: str) -> List[str]:
+    request_counter = 0
     image.source.image_uri = image_url
-    response = client.label_detection(image=image)
-    labels = response.label_annotations
     return_list = []
+    while request_counter < 3 :
+        response = client.label_detection(image=image)
+        labels = response.label_annotations
+        if len(labels) != 0:
+            break
+        request_counter += 1
+    print(request_counter)
     if len(labels) == 0:
         raise HTTPException(400, 'We can not access the URL currently. Please download the content and pass it in.')
     for label in labels:
         new_list = label.description.split(' ')
         return_list.extend(new_list)
-    print(return_list)
     return return_list
 
 def scoring_word(image_words: List[str]) -> float:
@@ -39,22 +44,15 @@ def scoring_word(image_words: List[str]) -> float:
         score_of_one_word = 0
         try:
             results = model.wv.most_similar(positive=[b], topn=20)
-            print('=====results====')
-            print(results)
         except:
-            print(results)
-            print('============')
             continue
 
         for a in results:
             if a[0] in image_words:
                 match_word_num += 1
                 score_of_one_word += a[1] * 100
-                print("a")
         score_element = {'match_word_num': match_word_num, 'score_of_one_word': score_of_one_word}
         each_score.append(score_element)
-        print(each_score)
-    print("new_scorering")
                     
     return _max_match_raito(each_score)
 
