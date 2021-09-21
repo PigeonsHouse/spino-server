@@ -50,13 +50,13 @@ def _get_user(db: Session, id: str) -> User:
 
 def change_info(db: Session, payload: PutUser, id: str) -> User:
     user_orm = db.query(models.User).filter(models.User.id == id).first()
-    if (payload.name != None):
-        user_orm.name = payload.name
-    elif (payload.img != None):
-        user_orm.img = payload.img
-    else:
-        user_orm.name = payload.name
-        user_orm.img =payload.name
+    if user_orm == None:
+        raise HTTPException(
+            status_code=400,
+            detail="changing user is not exist"
+        )
+    user_orm.name = user_orm.name if payload.name is None else payload.name
+    user_orm.img = user_orm.img if payload.img is None else payload.img
 
     db.commit()
     db.refresh(user_orm)

@@ -16,7 +16,7 @@ def posts_me(limit: int = 30, db: Session = Depends(get_db), current_user_id: st
         post_me.rank = get_post_rank(db, post_me.id)
     return posts_me
 
-@post_router.delete('/posts/{post_id}', response_model=bool, dependencies=[Depends(get_current_user_id)])
-def delete_post(post_id: str, db: Session = Depends(get_db)):
-    result = delete_post_by_id(db, post_id)
+@post_router.delete('/posts/{post_id}', response_model=bool)
+def delete_post(post_id: str, db: Session = Depends(get_db), user_id: int = Depends(get_current_user_id)):
+    result = delete_post_by_id(db, post_id, user_id)
     return result

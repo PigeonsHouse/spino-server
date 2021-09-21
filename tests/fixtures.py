@@ -1,3 +1,4 @@
+from cruds.posts import set_high_score_post
 import requests
 import sqlalchemy
 import pytest
@@ -109,6 +110,23 @@ def post_user_for_test(session_for_test, user_token_factory_test):
   return user
 
 @pytest.fixture
+def post_second_user_for_test(session_for_test, user_token_factory_test):
+  user_token_test = user_token_factory_test(user_num=1)
+  user_id = firebase_admin.auth.verify_id_token(user_token_test)['user_id']
+  user_orm = models.User(
+    id = user_id,
+    name = "username",
+    img = "imgURL"
+  )
+
+  session_for_test.add(user_orm)
+  session_for_test.commit()
+  session_for_test.refresh(user_orm)
+  user = User.from_orm(user_orm)
+
+  return user
+
+@pytest.fixture
 def post_factory_for_test(session_for_test, user_token_factory_test):
   def create_post_for_test(
     user_num: int = 0,
@@ -127,6 +145,8 @@ def post_factory_for_test(session_for_test, user_token_factory_test):
     session_for_test.commit()
     session_for_test.refresh(post_orm)
     post = Post.from_orm(post_orm)
+
+    set_high_score_post(session_for_test, post.id, user_id, point, image_url)
 
     return post
   return create_post_for_test
