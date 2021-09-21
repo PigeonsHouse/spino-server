@@ -38,8 +38,10 @@ def image_post_google(image_url: str) -> List[str]:
     return return_list
 
 def scoring_word(image_words: List[str]) -> float:
+    add_score = 0
     fil = word_filter(image_words)
-    if fil == 0.0:
+    if fil == True:
+        add_score = 0
         return 0
     each_score = []
     results = []
@@ -58,16 +60,16 @@ def scoring_word(image_words: List[str]) -> float:
         score_element = {'match_word_num': match_word_num, 'score_of_one_word': score_of_one_word}
         each_score.append(score_element)
     
-    a = _max_match_raito(each_score)
-    b = a + fil
+    result_score = _max_match_raito(each_score)
+    b = result_score + add_score
     return b * b / 20
 
-def word_filter(image_words: List[str]) -> float:
+def word_filter(image_words: List[str]) -> bool:
     if mainus_word_list[0] in image_words:
         print("減点")
-        return 0.0
+        return True
 
-    return 0
+    return False
 
 def _max_match_raito(each_score: List[dict]) -> float:
     max_point = 10
