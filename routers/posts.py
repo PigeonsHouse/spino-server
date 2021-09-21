@@ -3,7 +3,7 @@ from db import models, get_db
 from schemas.users import BaseUser
 from sqlalchemy.orm.session import Session
 from fastapi import Depends
-from cruds.posts import get_posts_me
+from cruds.posts import get_posts_me, delete_post_by_id
 from cruds.users import get_current_user_id
 from fastapi import APIRouter
 
@@ -13,3 +13,8 @@ post_router = APIRouter()
 def posts_me(db: Session = Depends(get_db), current_user_id: str = Depends(get_current_user_id)):
     posts_me = get_posts_me(db, current_user_id)
     return posts_me
+
+@post_router.delete('/posts/{post_id}', response_model=bool, dependencies=[Depends(get_current_user_id)])
+def delete_post(post_id: str, db: Session = Depends(get_db)):
+    result = delete_post_by_id(db, post_id)
+    return result

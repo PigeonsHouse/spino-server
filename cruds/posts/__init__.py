@@ -106,3 +106,12 @@ def convert_http_url_from_gs(gs_url: str) -> str:
     url = backet.blob(blob_path).generate_signed_url(expiration=datetime.now())
 
     return url
+
+def delete_post_by_id(db: Session, post_id: str) -> bool:
+    delete_post = db.query(models.Post).filter(models.Post.id == post_id).first()
+    if delete_post == None:
+        raise HTTPException(400, 'Post not exist.')
+    print(delete_post)
+    a = db.delete(delete_post)
+    db.commit()
+    return True
