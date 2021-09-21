@@ -1,13 +1,11 @@
 from fastapi.exceptions import HTTPException
-from firebase_strage_adaptor import convert_http_url_from_gs
 from cruds.users import get_current_user_id
-from cruds.posts import image_post_google, scoring_word, set_score_for_db
+from cruds.posts import convert_http_url_from_gs, image_post_google, scoring_word, set_score_for_db
 from schemas.posts import CreatingPost, Post
 from db import get_db
 from fastapi import APIRouter
 from sqlalchemy.orm.session import Session
 from fastapi.params import Depends
-import statistics
 
 scoring_router = APIRouter()
 
