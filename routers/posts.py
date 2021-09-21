@@ -13,7 +13,7 @@ post_router = APIRouter()
 def posts_me(limit: int = 30, db: Session = Depends(get_db), current_user_id: str = Depends(get_current_user_id)):
     posts_me = get_posts_me_by_limit(db, current_user_id, limit)
     for post_me in posts_me:
-        post_me.rank_post = get_post_rank(db, post_me.id)
+        post_me.rank = get_post_rank(db, post_me.id)
     return posts_me
 
 @post_router.delete('/posts/{post_id}', response_model=bool, dependencies=[Depends(get_current_user_id)])
