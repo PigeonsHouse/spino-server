@@ -12,7 +12,9 @@ from datetime import timedelta
 
 client = vision.ImageAnnotatorClient()
 image = vision.Image()
-model = word2vec.Word2Vec.load('word2vec.model')
+model = word2vec.Word2Vec.load('word2vec_summer_1.model')
+
+mainus_word_list = ['Snow']
 
 subscription_key = os.environ.get('SUBSCRIPTION_KEY')
 endpoint = os.environ.get('AZURE_ENDPOINT')
@@ -36,8 +38,10 @@ def image_post_google(image_url: str) -> List[str]:
     return return_list
 
 def scoring_word(image_words: List[str]) -> float:
+    fil = word_filter(image_words)
+    if fil == 0.0:
+        return 0
     each_score = []
-    
     results = []
     for b in image_words:
         match_word_num = 0
@@ -50,20 +54,29 @@ def scoring_word(image_words: List[str]) -> float:
         for a in results:
             if a[0] in image_words:
                 match_word_num += 1
-                score_of_one_word += a[1] * 100
+                score_of_one_word += a[1] * 10
         score_element = {'match_word_num': match_word_num, 'score_of_one_word': score_of_one_word}
         each_score.append(score_element)
-                    
-    return _max_match_raito(each_score)
+    
+    a = _max_match_raito(each_score)
+    b = a + fil
+    return b * b / 20
 
-def _max_match_raito(each_score: List[dict]):
+def word_filter(image_words: List[str]) -> float:
+    if mainus_word_list[0] in image_words:
+        print("減点")
+        return 0.0
+
+    return 0
+
+def _max_match_raito(each_score: List[dict]) -> float:
     max_point = 10
     max_raito = -1
     for index in each_score:
         if index['match_word_num'] > max_raito:
             max_point = index['score_of_one_word']
             max_raito = index['match_word_num']
-    
+
     return max_point
 
 def set_score_for_db(db: Session, user_id: str, score: float, image_url: str) -> Post:
