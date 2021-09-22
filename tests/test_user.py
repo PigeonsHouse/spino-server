@@ -205,3 +205,68 @@ class TestUser:
 
         assert res.status_code == 403
 
+    def test_get_user_ranking_with_delete(use_test_db_fixture, user_token_factory_test, post_user_for_test, post_second_user_for_test, post_factory_for_test):
+        """
+        投稿を削除しつつユーザーランキングを取得する
+        """
+        first_high_score = 50
+        second_high_score = 30
+        third_high_score = 10
+
+        token_1 = user_token_factory_test(user_num=0)
+        token_2 = user_token_factory_test(user_num=1)
+
+        post_1_low = post_factory_for_test(user_num=0, point=third_high_score)
+        post_2 = post_factory_for_test(user_num=1, point=second_high_score)
+        post_1_high = post_factory_for_test(user_num=0, point=first_high_score)
+
+        res = client.get('/api/v1/ranking/users', headers={
+            "Authorization": f"Bearer { token_1 }"
+        })
+
+        assert res.status_code == 200
+        res_json = res.json()
+
+        assert len(res_json) == 2
+        assert res_json[0]['id'] == post_user_for_test.id
+        assert res_json[0]['high_score'] == first_high_score
+
+
+        res = client.delete(f'/api/v1/posts/{ post_1_high.id }', headers={
+            "Authorization": f"Bearer { token_1 }"
+        })
+
+        assert res.status_code == 200
+        assert res.json() == True
+
+
+        res = client.get('/api/v1/ranking/users', headers={
+            "Authorization": f"Bearer { token_1 }"
+        })
+
+        assert res.status_code == 200
+        res_json = res.json()
+
+        assert len(res_json) == 2
+        assert res_json[0]['id'] == post_second_user_for_test.id
+        assert res_json[0]['high_score'] == second_high_score
+
+
+        res = client.delete(f'/api/v1/posts/{ post_2.id }', headers={
+            "Authorization": f"Bearer { token_2 }"
+        })
+
+        assert res.status_code == 200
+        assert res.json() == True
+
+
+        res = client.get('/api/v1/ranking/users', headers={
+            "Authorization": f"Bearer { token_1 }"
+        })
+
+        assert res.status_code == 200
+        res_json = res.json()
+
+        assert len(res_json) == 1
+        assert res_json[0]['id'] == post_user_for_test.id
+        assert res_json[0]['high_score'] == third_high_score

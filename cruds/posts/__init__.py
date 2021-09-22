@@ -152,7 +152,7 @@ def convert_http_url_from_gs(gs_url: str) -> str:
 
     return url
 
-def delete_post_by_id(db: Session, post_id: str, user_id) -> bool:
+def delete_post_by_id(db: Session, post_id: str, user_id: str) -> bool:
     delete_post = db.query(models.Post).filter(models.Post.id == post_id).first()
     if delete_post == None:
         raise HTTPException(400, 'Post not exist.')
@@ -164,8 +164,17 @@ def delete_post_by_id(db: Session, post_id: str, user_id) -> bool:
     db.delete(delete_post)
     delete_top_post = db.query(models.TopPost).filter(models.TopPost.id == post_id).first()
     if delete_top_post is not None:
-        print(delete_top_post)
         db.delete(delete_top_post)
+        db.commit()
+        next_top_post = db.query(models.Post).filter(models.Post.user_id == user_id).order_by(models.Post.point).first()
+        if next_top_post is not None:
+            top_post = models.TopPost(
+                id = next_top_post.id,
+                point = next_top_post.point,
+                user_id = next_top_post.user_id,
+                image_url = next_top_post.image_url
+            )
+            db.add(top_post)
     db.commit()
     return True
 

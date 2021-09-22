@@ -19,6 +19,6 @@ def get_posts_ranking(limit: int = 30, db: Session = Depends(get_db)):
     return ranking
 
 @ranking_router.get('/ranking/users', response_model=List[RankingUser], dependencies=[Depends(get_current_user_id)])
-def get_posts_ranking(limit: int = 30, db: Session = Depends(get_db)):
+def get_users_ranking(limit: int = 30, db: Session = Depends(get_db)):
     ranking = get_user_rank_by_limit(db, limit)
     return ranking
