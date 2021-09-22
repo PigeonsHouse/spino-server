@@ -15,6 +15,7 @@ image = vision.Image()
 model = word2vec.Word2Vec.load('word2vec_summer_1.model')
 
 mainus_word_list = ['Snow']
+plus_word_list = ['Water', 'Sky', 'Beach', 'Flower']
 
 subscription_key = os.environ.get('SUBSCRIPTION_KEY')
 endpoint = os.environ.get('AZURE_ENDPOINT')
@@ -39,10 +40,12 @@ def image_post_google(image_url: str) -> List[str]:
 
 def scoring_word(image_words: List[str]) -> int:
     add_score = 0
+    score = 0
     fil = word_filter(image_words)
-    if fil == True:
-        add_score = 0
-        return 0
+    if fil == -1:
+        score = 0
+    if fil > 0:
+        add_score += fil * 12
     each_score = []
     results = []
     for b in image_words:
@@ -62,14 +65,23 @@ def scoring_word(image_words: List[str]) -> int:
     
     result_score = _max_match_raito(each_score)
     b = result_score + add_score
-    return int(b * b / 20)
+    if fil == -1:
+        b = score
+    return_score = int(b * b / 40)
+    if return_score > 100:
+        return_score = 100
+    return return_score
 
-def word_filter(image_words: List[str]) -> bool:
+def word_filter(image_words: List[str]) -> int:
+    count = 0
     if mainus_word_list[0] in image_words:
         print("減点")
-        return True
+        return -1
+    for plus_word in plus_word_list:
+        if plus_word in image_words:
+            count += 1
 
-    return False
+    return count
 
 def _max_match_raito(each_score: List[dict]) -> int:
     max_point = 10
