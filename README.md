@@ -1,5 +1,7 @@
 # 夏の赤ペン先生
 
+### [フロントリポジトリ](https://github.com/citrus-candy/summer-scoring-app)
+
 ## 開発技術
 コマンド
 
