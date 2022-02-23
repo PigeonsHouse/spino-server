@@ -31,6 +31,7 @@ docker volume rm spino-server_dbdata
 
 - 画像
     - Microsoft Azure - Computer Vision
+    - Cloud Vision API
 - 単語
     - word2vec
 
